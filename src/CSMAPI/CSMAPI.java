@@ -18,11 +18,22 @@ public class CSMAPI {
 	static private final String local_log_tag = "CSMAPI";
 	static public String ENDPOINT = "http://openmtc.darkgerm.com:9999";
 	
+	public static class CSMError extends Exception {
+		String msg;
+		public CSMError (String message) {
+	        super(message);
+		}
+		
+		public CSMError (String message, Throwable cause) {
+			super(message, cause);
+		}
+	}
+	
 	static public void set_logtag (String logtag) {
 		CSMAPI.log_tag = logtag;
 	}
 	
-	static public boolean register (String d_id, JSONObject profile) {
+	static public boolean register (String d_id, JSONObject profile) throws CSMError {
 		try {
 	        String url = ENDPOINT +"/"+ d_id;
 			logging("[register] "+ url);
@@ -33,8 +44,9 @@ public class CSMAPI {
 				logging("[register] "+ "Response from "+ url);
 				logging("[register] "+ "Response Code: "+ res.status_code);
 				logging("[register] "+ res.body);
+				throw new CSMError(res.body);
 			}
-	        return res.status_code == 200;
+	        return true;
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
@@ -43,7 +55,7 @@ public class CSMAPI {
 		return false;
 	}
 
-    static public boolean deregister (String d_id) {
+    static public boolean deregister (String d_id) throws CSMError {
 		try {
 			String url = ENDPOINT +"/"+ d_id;
 			logging("[deregister] "+ url);
@@ -52,15 +64,16 @@ public class CSMAPI {
 				logging("[deregister] "+ "Response from "+ url);
 				logging("[deregister] "+ "Response Code: "+ res.status_code);
 				logging("[deregister] "+ res.body);
+				throw new CSMError(res.body);
 			}
-	        return res.status_code == 200;
+	        return true;
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
 		return false;
     }
     
-    static public boolean push (String d_id, String df_name, JSONObject data) {
+    static public boolean push (String d_id, String df_name, JSONObject data) throws CSMError {
     	try {
 			//logging(d_id +" pushing to "+ ENDPOINT);
 			String url = ENDPOINT +"/"+ d_id + "/" + df_name;
@@ -69,15 +82,16 @@ public class CSMAPI {
 				logging("[push] "+ "Response from "+ url);
 				logging("[push] "+ "Response Code: "+ res.status_code);
 				logging("[push] "+ res.body);
+				throw new CSMError(res.body);
 			}
-	        return res.status_code == 200;
+	        return true;
 		} catch (NullPointerException e) {
 			e.printStackTrace();
 		}
     	return false;
     }
     
-    static public JSONArray pull (String d_id, String df_name) throws JSONException {
+    static public JSONArray pull (String d_id, String df_name) throws JSONException, CSMError {
 	    try {
 			//logging(d_id +" pulling from "+ ENDPOINT);
 			String url = ENDPOINT +"/"+ d_id + "/" + df_name;
@@ -86,6 +100,7 @@ public class CSMAPI {
 				logging("[pull] "+ "Response from "+ url);
 				logging("[pull] "+ "Response Code: "+ res.status_code);
 				logging("[pull] "+ res.body);
+				throw new CSMError(res.body);
 			}
 			JSONObject tmp = new JSONObject(res.body);
 	        return tmp.getJSONArray("samples");
@@ -95,6 +110,25 @@ public class CSMAPI {
 		}
 		return null;
 	}
+    
+    static public JSONObject tree () throws CSMError {
+	    try {
+			//logging(d_id +" pulling from "+ ENDPOINT);
+			String url = ENDPOINT +"/tree";
+	        http.response res = http.get(url);
+			if (res.status_code != 200) {
+				logging("[tree] "+ "Response from "+ url);
+				logging("[tree] "+ "Response Code: "+ res.status_code);
+				logging("[tree] "+ res.body);
+				throw new CSMError(res.body);
+			}
+			return new JSONObject(res.body);
+	        
+		} catch (NullPointerException e) {
+			e.printStackTrace();
+		}
+		return null;
+    }
 	
 	static private class http {
     	static public class response {
