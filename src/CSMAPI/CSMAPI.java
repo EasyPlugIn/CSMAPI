@@ -29,7 +29,7 @@ public class CSMAPI {
 		}
 	}
 	
-	static public void set_logtag (String logtag) {
+	static public void set_log_tag (String logtag) {
 		CSMAPI.log_tag = logtag;
 	}
 	
