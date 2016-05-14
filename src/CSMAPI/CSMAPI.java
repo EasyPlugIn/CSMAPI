@@ -73,11 +73,13 @@ public class CSMAPI {
 		return false;
     }
     
-    static public boolean push (String d_id, String df_name, JSONObject data) throws CSMError {
+    static public boolean push (String d_id, String df_name, JSONArray data) throws CSMError {
     	try {
 			//logging(d_id +" pushing to "+ ENDPOINT);
+    	    JSONObject obj = new JSONObject();
+    	    obj.put("data", data);
 			String url = ENDPOINT +"/"+ d_id + "/" + df_name;
-			http.response res = http.put(url, data);
+			http.response res = http.put(url, obj);
 			if (res.status_code != 200) {
 				logging("[push] "+ "Response from "+ url);
 				logging("[push] "+ "Response Code: "+ res.status_code);
